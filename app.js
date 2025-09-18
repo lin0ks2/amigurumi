@@ -58,8 +58,7 @@ async function initLang() {
     localStorage.setItem('lang', LANG);
     applyLang();
     render();
-    if (!qs('#lightbox').hidden) updateLightboxCaption();
-  });
+    if (!qs('#lightbox').hidden) });
 }
 function applyLang() {
   document.documentElement.lang = LANG;
@@ -120,14 +119,10 @@ function render() {
 
     const pic = document.createElement('picture');
 const sWebp = document.createElement('source'); sWebp.type='image/webp'; sWebp.srcset = photo.thumbWebp; pic.appendChild(sWebp);
-const img = document.createElement('img'); img.loading='lazy'; img.decoding='async'; img.src = photo.thumbJpg; img.alt = currentTitleFor(photo.key); pic.appendChild(img);
+const img = document.createElement('img'); img.loading='lazy'; img.decoding='async'; img.src = photo.thumbJpg; img.alt = ''; pic.appendChild(img);
 imgWrap.appendChild(pic);
 
-    const caption = document.createElement('div');
-    caption.className = 'card__caption';
-    caption.textContent = currentTitleFor(photo.key);
-
-    card.append(imgWrap, caption);
+    card.append(imgWrap);
     wrap.appendChild(card);
   });
 
@@ -180,7 +175,6 @@ function openLightbox(index) {
   const img = qs('#lightboxImg');
   img.src = photos[index].fullWebp; img.onerror = () => { img.onerror=null; img.src = photos[index].fullJpg; };
   img.alt = currentTitleFor(photos[index].key);
-  updateLightboxCaption();
   lb.hidden = false;
   const onKey = (e) => {
     if (e.key === 'Escape') closeLightbox();
@@ -190,10 +184,7 @@ function openLightbox(index) {
   document.addEventListener('keydown', onKey);
   lb._onKey = onKey;
 }
-function updateLightboxCaption() {
-  const cap = qs('#lightboxCaption');
-  if (cap && photos[currentIndex]) cap.textContent = currentTitleFor(photos[currentIndex].key);
-}
+function updateLightboxCaption(){}
 function closeLightbox() {
   const lb = qs('#lightbox');
   lb.hidden = true;
@@ -204,8 +195,7 @@ function step(dir) {
   const img = qs('#lightboxImg');
   img.src = photos[currentIndex].fullWebp; img.onerror = () => { img.onerror=null; img.src = photos[currentIndex].fullJpg; };
   img.alt = currentTitleFor(photos[currentIndex].key);
-  updateLightboxCaption();
-}
+  }
 
 /* Start */
 document.addEventListener('DOMContentLoaded', async () => {
