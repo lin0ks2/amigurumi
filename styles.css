@@ -191,3 +191,15 @@ main.container {
   font-size: 22px;  /* сейчас браузер сам рендерит примерно 16–18px */
   line-height: 1;
 }
+/* Полностью скрыть подпись и её контейнер в лайтбоксе */
+#lightboxCaption,
+.lightbox__caption,
+.lightbox-footer,
+.lightbox__footer {
+  display: none !important;
+}
+
+/* Если у фрейма был внутренний отступ "под подпись" — убираем */
+.lightbox__frame {
+  padding-bottom: 0 !important;
+}
