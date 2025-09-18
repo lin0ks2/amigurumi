@@ -203,3 +203,13 @@ main.container {
 .lightbox__frame {
   padding-bottom: 0 !important;
 }
+.lightbox__img { transition: opacity .15s ease; opacity: 1; }
+.lightbox__img.is-loading { opacity: 0; }
+
+.lightbox__frame { padding: max(16px, env(safe-area-inset-top)) 16px
+   max(16px, env(safe-area-inset-bottom)) 16px; }
+:root[data-theme="dark"] {
+  --bg: #1e2024; --card: #23262b;
+}
+body { background: var(--bg); }
+.card { background: var(--card); }
