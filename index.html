@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Кристина амигуруми — Галерея</title>
+  <meta name="description" content="Портфолио вязаных игрушек в технике амигуруми: лучшие работы, фото и вдохновение." />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+  <link rel="icon" type="image/png" sizes="128x128" href="favicon-128.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <link href="styles.css?v=1.3.2" rel="stylesheet" />
+</head>
+<body class="page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"></span>
+        <div class="titles">
+          <h1 id="siteTitle">Кристина амигуруми</h1>
+          <p id="siteSubtitle" class="subtitle">вязаные игрушки крючком — ручная работа</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="langToggle" class="icon-btn" aria-label="Язык интерфейса" title="Язык интерфейса">
+          <span id="langFlag" aria-hidden="true">🇷🇺</span>
+        </button>
+        <button id="themeToggle" class="icon-btn" aria-pressed="false" aria-label="Переключить тему" title="Переключить тему">
+          <svg id="iconSun" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V2m0 20v-2M4 12H2m20 0h-2M5 5 3.6 3.6M20.4 20.4 19 19M19 5l1.4-1.4M3.6 20.4 5 19M12 8a4 4 0 100 8 4 4 0 000-8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg id="iconMoon" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="gallery" class="gallery" aria-live="polite"></div>
+    <nav id="pagination" class="pagination" aria-label="Пагинация галереи" hidden></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p id="footerL1">🧵 Амигуруми — маленькие радости, связанные с теплом.</p>
+      <p id="footerL2">© <span id="year"></span> Твоё портфолио • Контакты: добавь email/instagram/telegram.</p>
+    </div>
+  </footer>
+
+  <div id="lightbox" class="lightbox" hidden aria-modal="true" role="dialog" aria-label="Просмотр фото">
+    <figure class="lightbox__frame">
+      <button class="lightbox__close" id="lightboxClose" aria-label="Закрыть">×</button>
+      <img id="lightboxImg" alt="" />
+      <!-- figcaption удалён, чтобы не было пустой полосы -->
+    </figure>
+    <button class="lightbox__nav prev" id="lightboxPrev" aria-label="Предыдущее фото">‹</button>
+    <button class="lightbox__nav next" id="lightboxNext" aria-label="Следующее фото">›</button>
+  </div>
+
+  <script src="app.js?v=1.3.9" defer></script>
+</body>
+</html>
