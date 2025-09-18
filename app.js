@@ -1,3 +1,51 @@
+
+// === image pipeline helpers (auto-generated) ===
+function amiSrcs(base) {
+  const file = base.split('/').pop();
+  const name = file.replace(/\.[^.]+$/, '');
+  return {
+    thumbWebp: `photos/thumb/${name}.webp`,
+    thumbJpg:  `photos/thumb/${name}.jpg`,
+    fullWebp:  `photos/full/${name}.webp`,
+    fullJpg:   `photos/full/${name}.jpg`
+  };
+}
+function amiPictureEl(base, alt, classes) {
+  const s = amiSrcs(base);
+  const pic = document.createElement('picture');
+  if (classes) pic.className = classes;
+  const s2 = document.createElement('source');
+  s2.type = 'image/webp';
+  s2.srcset = s.thumbWebp;
+  const img = document.createElement('img');
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.src = s.thumbJpg;
+  img.alt = alt || '';
+  pic.appendChild(s2);
+  pic.appendChild(img);
+  return pic;
+}
+
+
+// === merged: theme handling with system preference ===
+const THEME_KEY = 'theme';
+const META_THEME = document.querySelector('#meta-theme-color');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  if (META_THEME) META_THEME.setAttribute('content', theme === 'dark' ? '#1b1d21' : '#ffffff');
+}
+function detectSystemTheme() {
+  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+let __savedTheme = localStorage.getItem(THEME_KEY);
+if (!__savedTheme) {
+  __savedTheme = detectSystemTheme();
+  localStorage.setItem(THEME_KEY, __savedTheme);
+}
+applyTheme(__savedTheme);
+
 const PAGE_SIZE = 25;
 const PHOTOS_MANIFEST = 'photos/photos.json';
 
@@ -58,7 +106,8 @@ async function initLang() {
     localStorage.setItem('lang', LANG);
     applyLang();
     render();
-    if (!qs('#lightbox').hidden) });
+    if (!qs('#lightbox').hidden) updateLightboxCaption();
+  });
 }
 function applyLang() {
   document.documentElement.lang = LANG;
@@ -79,17 +128,7 @@ async function loadPhotos() {
   if (!res.ok) throw new Error('Не удалось загрузить список фото');
   const files = await res.json();
   files.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }) * -1);
-  photos = files.map(fn => {
-  const base = fn.replace(/\.[a-z0-9]+$/i, '');
-  return {
-    key: base,
-    srcOriginal: `photos/${fn}`,
-    thumbWebp: `photos/thumb/${base}.webp`,
-    thumbJpg:  `photos/thumb/${base}.jpg`,
-    fullWebp:  `photos/full/${base}.webp`,
-    fullJpg:   `photos/full/${base}.jpg`
-  };
-});
+  photos = files.map(fn => ({ src: `photos/${fn}`, key: fn.replace(/\.[a-z0-9]+$/i, '') }));
 }
 function currentTitleFor(key) {
   return (PHOTO_TITLES[key] && PHOTO_TITLES[key][LANG]) ? PHOTO_TITLES[key][LANG] : key;
@@ -113,16 +152,20 @@ function render() {
     card.className = 'card';
 
     const imgWrap = document.createElement('a');
-    imgWrap.href = photo.fullJpg;
+    imgWrap.href = photo.src;
     imgWrap.className = 'card__imgwrap';
     imgWrap.addEventListener('click', (e) => { e.preventDefault(); openLightbox(globalIndex); });
 
-    const pic = document.createElement('picture');
-const sWebp = document.createElement('source'); sWebp.type='image/webp'; sWebp.srcset = photo.thumbWebp; pic.appendChild(sWebp);
-const img = document.createElement('img'); img.loading='lazy'; img.decoding='async'; img.src = photo.thumbJpg; img.alt = ''; pic.appendChild(img);
-imgWrap.appendChild(pic);
+    const img = document.createElement('img');
+    img.loading = 'lazy'; img.decoding = 'async';
+    img.src = photo.src; img.alt = currentTitleFor(photo.key);
+    imgWrap.appendChild(img);
 
-    card.append(imgWrap);
+    const caption = document.createElement('div');
+    caption.className = 'card__caption';
+    caption.textContent = currentTitleFor(photo.key);
+
+    card.append(imgWrap, caption);
     wrap.appendChild(card);
   });
 
@@ -173,8 +216,9 @@ function openLightbox(index) {
   currentIndex = index;
   const lb = qs('#lightbox');
   const img = qs('#lightboxImg');
-  img.src = photos[index].fullWebp; img.onerror = () => { img.onerror=null; img.src = photos[index].fullJpg; };
+  img.src = photos[index].src;
   img.alt = currentTitleFor(photos[index].key);
+  updateLightboxCaption();
   lb.hidden = false;
   const onKey = (e) => {
     if (e.key === 'Escape') closeLightbox();
@@ -184,7 +228,10 @@ function openLightbox(index) {
   document.addEventListener('keydown', onKey);
   lb._onKey = onKey;
 }
-function updateLightboxCaption(){}
+function updateLightboxCaption() {
+  const cap = qs('#lightboxCaption');
+  if (cap && photos[currentIndex]) cap.textContent = currentTitleFor(photos[currentIndex].key);
+}
 function closeLightbox() {
   const lb = qs('#lightbox');
   lb.hidden = true;
@@ -193,9 +240,10 @@ function closeLightbox() {
 function step(dir) {
   currentIndex = (currentIndex + dir + photos.length) % photos.length;
   const img = qs('#lightboxImg');
-  img.src = photos[currentIndex].fullWebp; img.onerror = () => { img.onerror=null; img.src = photos[currentIndex].fullJpg; };
+  img.src = photos[currentIndex].src;
   img.alt = currentTitleFor(photos[currentIndex].key);
-  }
+  updateLightboxCaption();
+}
 
 /* Start */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -417,3 +465,35 @@ if (document.readyState !== 'loading') {
   // Подстраховка: если закрывают по кнопке — тоже onClose
   btnClose?.addEventListener('click', () => { if (!isOpen()) onClose(); });
 })();
+
+
+// === merged: a11y labels & guards ===
+window.addEventListener('DOMContentLoaded', () => {
+  // Pagination buttons (try several selectors)
+  const STR = window.STRINGS || {};
+  const lang = (window.LANG || (navigator.language||'en').slice(0,2)).toLowerCase();
+  const tr = (k, fb) => (STR[k] && (STR[k][lang] || STR[k][lang.slice(0,2)])) || fb || k;
+
+  document.querySelectorAll('[data-pagination="prev"], .pagination .prev, button.prev').forEach(btn => {
+    if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', tr('prevPage','Предыдущая страница'));
+  });
+  document.querySelectorAll('[data-pagination="next"], .pagination .next, button.next').forEach(btn => {
+    if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', tr('nextPage','Следующая страница'));
+  });
+
+  const lb = document.querySelector('.lightbox, [role="dialog"].lightbox, .lb');
+  if (lb) {
+    const closeBtn = lb.querySelector('.close, [data-action="close"]');
+    const prevBtn  = lb.querySelector('.prev, [data-action="prev"]');
+    const nextBtn  = lb.querySelector('.next, [data-action="next"]');
+    if (closeBtn && !closeBtn.getAttribute('aria-label')) closeBtn.setAttribute('aria-label', tr('close','Закрыть'));
+    if (prevBtn  && !prevBtn.getAttribute('aria-label'))  prevBtn.setAttribute('aria-label',  tr('prev','Предыдущее'));
+    if (nextBtn  && !nextBtn.getAttribute('aria-label'))  nextBtn.setAttribute('aria-label',  tr('next','Следующее'));
+  }
+
+  // Prevent double swipe-binding if you use bindSwipe()
+  const frame = document.querySelector('.lightbox-frame, .lb-frame');
+  if (frame && window.bindSwipe && !frame._swipeBound) {
+    try { window.bindSwipe(frame, ()=>{}, ()=>{}); frame._swipeBound = true; } catch(_) {}
+  }
+});
